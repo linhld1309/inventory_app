@@ -1,14 +1,31 @@
+import { useEffect, useState } from "react";
 import { FlatList, SafeAreaView, TextInput } from "react-native";
 import { View } from "@/components/Themed";
-import ProductItem from '@/components/ProductItem';
+import ProductItem from "@/components/ProductItem";
+import { db } from "@/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+import _ from "lodash";
+import { Product } from "@/constants/types"
 
 export default function ProductList() {
-  const products = [
-    { id: 1, name: 'Sản phẩm 1', code: '001', input_price: 100, sale_price: 150, profits: 50, product_image: 'https://gialainews.com/wp-content/uploads/2021/05/abb3563f427dab23f26c.jpg' },
-    { id: 2, name: 'Sản phẩm 2', code: '002', input_price: 200, sale_price: 232, profits: 32, product_image: 'https://gialainews.com/wp-content/uploads/2021/05/abb3563f427dab23f26c.jpg' },
-    { id: 3, name: 'Sản phẩm 3', code: '003', input_price: 300, sale_price: 300, profits: 0, product_image: 'https://gialainews.com/wp-content/uploads/2021/05/abb3563f427dab23f26c.jpg' },
-    // Thêm dữ liệu sản phẩm khác nếu cần
-  ];
+  const [products, setproducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getDataProduct();
+  }, []);
+
+  async function getDataProduct() {
+    try {
+      const product_data: never[] = [];
+      const productsCol = collection(db, 'products');
+      const querySnapshot = await getDocs(productsCol);
+      querySnapshot.forEach((doc) => {
+        setproducts([..._.concat(product_data, doc?.data())])
+      });
+    } catch (error) {
+      return false
+    }
+  }
 
   return (
     <SafeAreaView className="flex-1 items-center justify-center">
@@ -21,7 +38,7 @@ export default function ProductList() {
        <FlatList
         data={products}
         renderItem={({ item }) => <ProductItem item={item} />}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item?.code.toString()}
         className="w-11/12"
       />
     </SafeAreaView>
